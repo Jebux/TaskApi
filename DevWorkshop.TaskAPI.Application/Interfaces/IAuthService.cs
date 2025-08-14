@@ -36,4 +36,6 @@ public interface IAuthService
     /// <param name="email">Email del usuario</param>
     /// <returns>Token JWT</returns>
     string GenerateJwtToken(int userId, string email);
+    string GenerateJwtToken(int userId, string email, string? roleName);
+    Task<bool> LogoutAsync(int userId);
 }
