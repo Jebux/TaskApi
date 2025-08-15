@@ -213,29 +213,35 @@ public class AuthService : IAuthService
         }
     }
 
-    Task<AuthResponseDto?> IAuthService.LoginAsync(LoginDto loginDto)
-    {
-        throw new NotImplementedException();
-    }
 
-    bool IAuthService.VerifyPassword(string password, string hashedPassword)
+    /// <summary>
+    /// Cierra la sesión de un usuario invalidando su token
+    /// </summary>
+    public async Task<bool> LogoutAsync(int userId)
     {
-        throw new NotImplementedException();
-    }
+        try
+        {
+            _logger.LogInformation("Iniciando proceso de logout para usuario: {UserId}", userId);
 
-    string IAuthService.HashPassword(string password)
-    {
-        throw new NotImplementedException();
-    }
+            var user = await _userService.GetUserEntityByIdAsync(userId);
+            if (user == null)
+            {
+                _logger.LogWarning("Usuario no encontrado para logout: {UserId}", userId);
+                return false;
+            }
 
-    string IAuthService.GenerateJwtToken(int userId, string email, string? roleName)
-    {
-        throw new NotImplementedException();
-    }
+            // Actualizar timestamp para invalidar tokens anteriores
+            user.LastTokenIssueAt = DateTime.UtcNow;
+            await _userService.UpdateUserEntityAsync(user);
 
-    Task<bool> IAuthService.LogoutAsync(int userId)
-    {
-        throw new NotImplementedException();
+            _logger.LogInformation("Logout exitoso para usuario: {UserId}", userId);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error durante el logout para usuario: {UserId}", userId);
+            return false;
+        }
     }
 
     string IAuthService.GenerateJwtToken(int userId, string email)
